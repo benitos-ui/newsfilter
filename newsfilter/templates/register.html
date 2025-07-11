@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css')}}">
+    <title>Document</title>
+    <style>
+        body{
+            background: #121212;
+            justify-content: center;
+            color: #f1f1f1;
+        }
+    </style>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js')}}"></script>
+</head>
+<body >
+    <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="container-md text-center p-5 rounded shadow bg-dark " style="max-width: 600px;" >
+        
+        <form action="{{ url_for('traiter_register') }}" method="post">
+            <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Adresse email</label>
+               <input type="email" name="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+            </div>
+            
+            <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Nom d'utilisateur</label>
+               <input class="form-control" name="username" type="text" placeholder="Username" aria-label="default input example">
+            </div>
+            
+            <div class="d-grid gap-2"> <button class="btn btn-secondary btn-lg" type="submit">Envoyer</button></div>       
+        </form>  
+        
+    </div>
+    </div>
+</body>
+</html>
