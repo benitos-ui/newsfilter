@@ -18,20 +18,50 @@
     <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
     <div class="container-md text-center p-5 rounded shadow bg-dark " style="max-width: 600px;" >
         
-        <form action="{{ url_for('traiter_register') }}" method="post">
+        <form method="post">
+            {{form.hidden_tag()}}
             <div class="mb-3">
                <label for="exampleFormControlInput1" class="form-label">Adresse email</label>
-               <input type="email" name="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+               <input type="email" name="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com" required value="{{form.email.data or ''}}">
             </div>
             
             <div class="mb-3">
-               <label for="exampleFormControlInput1" class="form-label">Nom d'utilisateur</label>
-               <input class="form-control" name="username" type="text" placeholder="Username" aria-label="default input example">
+               <label for="exampleFormControlInput1" class="form-label">Nom</label>
+               <input class="form-control" name="nom" type="text" placeholder="Nom" aria-label="default input example" required value="{{form.nom.data or ''}}">
             </div>
-            
+
+            <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Prenom</label>
+               <input class="form-control" name="prenom" type="text" placeholder="Prenom" aria-label="default input example" required value="{{form.prenom.data or ''}}">
+            </div>
+
+             <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Pays</label>
+               <input class="form-control" name="pays" type="text" placeholder="Pays" aria-label="default input example" required value="{{form.pays.data or ''}}">
+            </div>
+
+             <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Age</label>
+               <input class="form-control" name="age" type="text" placeholder="Age" aria-label="default input example" required value="{{form.age.data or ''}}">
+            </div>
+
+             <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Ville</label>
+               <input class="form-control" name="ville" type="text" placeholder="Ville" aria-label="default input example" required value="{{form.ville.data or ''}}">
+            </div>
+                    {% if form.errors %}
+                        <div class="alert alert-danger mt-3">
+                        {% for field,errors in form.errors.items() %}
+                            {% for error in errors %}
+                                   <div>{{error}}</div>
+                             {%endfor%}
+                        {%endfor%}
+                        </div>
+                     {% endif %}
             <div class="d-grid gap-2"> <button class="btn btn-secondary btn-lg" type="submit">Envoyer</button></div>       
         </form>  
-        
+
+
     </div>
     </div>
 </body>

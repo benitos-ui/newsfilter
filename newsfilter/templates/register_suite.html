@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css')}}">
+    <title>Document</title>
+    <style>
+        body{
+            background: #121212;
+            justify-content: center;
+            color: #f1f1f1;
+        }
+    </style>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js')}}"></script>
+</head>
+<body>
+    <div  class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+        <div class="container-md text-center p-5 rounded shadow bg-dark " style="max-width: 600px;">
+            <form method="post">
+            {{form.hidden_tag()}}
+            <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Nom d'utilisateur</label>
+               {{form.username(class="form-control",placeholder="Username")}}
+            </div>
+            
+            <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Mot de passe</label>
+                {{form.password( class="form-control",placeholder="Au moins 6 caractères")}}
+            </div>
+
+            <div class="mb-3">
+               <label for="exampleFormControlInput1" class="form-label">Confirmer le mot de passe</label>
+               {{form.confirm_password(class="form-control",placeholder="Au moins 6 caractères")}}
+            </div>
+
+           
+
+   
+                    {% if form.errors %}
+                        <div class="alert alert-danger mt-3">
+                        {% for field,errors in form.errors.items() %}
+                            {% for error in errors %}
+                                   <div>{{error}}</div>
+                             {%endfor%}
+                        {%endfor%}
+                        </div>
+                     {% endif %}
+            <div class="d-grid gap-2"> <button class="btn btn-secondary btn-lg" type="submit">Envoyer</button></div>       
+        </form>  
+
+        </div>
+
+    </div>
+</body>
+</html>

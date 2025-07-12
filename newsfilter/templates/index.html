@@ -3,9 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css')}}">
     <title>Document</title>
+      <style>
+        body{
+            background: #121212;
+            justify-content: center;
+            color: #f1f1f1;
+        }
+    </style>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js')}}"></script>
 </head>
 <body>
-    ha
+    <div  class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+        <div class="container-md text-center p-5 rounded shadow bg-dark " style="max-width: 600px;">
+            <form method="post">
+                 {{validcode.hidden_tag()}}
+                <div class="mb-3">
+                    <p >Nous vous avons envoyer à votre adresse mail un code de confirmation</p>
+                </div>
+
+                <div class="mb-3">
+                  <label for="exampleFormControlInput1" class="form-label">Entrez le code</label>
+                    {{ validcode.code(class="form-control", placeholder="Entrez votre code", autocomplete="off") }}
+ 
+                </div>
+                {% if erreur %}
+                 <p style="color:red;">{{ erreur }}</p>
+                {% endif %}
+                 {{ validcode.submit() }} 
+            </form>
+
+        </div>
+
+    </div>
 </body>
 </html>

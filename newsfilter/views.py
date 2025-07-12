@@ -1,22 +1,154 @@
-from flask import Flask,render_template,request
-from models import Utilisateur
-from data import session
+from flask import Flask,render_template,request,abort,redirect,url_for,session
+from models import Utilisateur,User
+from data import session as db_session
+from flask_mail import Message,Mail
+from random import *
+from flask_wtf import FlaskForm
+from wtforms import StringField,SubmitField,PasswordField,IntegerField
+from wtforms.validators import DataRequired,Length,Email,NumberRange,EqualTo
+from werkzeug.security import generate_password_hash
+import os
+from sqlalchemy.orm import relationship
+from dotenv import load_dotenv
 
+load_dotenv()
+
+
+#email="benitoatigossou@gmail.com"
 app=Flask(__name__)
-@app.route("/")
+app.secret_key="secret"
+
+class Config:
+    MAIL_SERVER='smtp.gmail.com'
+    MAIL_PORT=587
+    MAIL_USE_TLS=True
+    MAIL_USE_SSL=False
+    MAIL_DEBUG=app.debug
+    MAIL_USERNAME=os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER')
+    MAIL_MAX_EMAILS=None
+    MAIL_SUPPRESS_SEND=app.testing
+    MAIL_ASCII_ATTACHEMENTS=False
+
+app.config.from_object(Config)
+
+mail=Mail(app)
+
+
+@app.route("/a_oublie")
 def afficher_register():
     return render_template('register.html')
 
-@app.route("/traiter_register",methods=['POST'])
+class RegisterForm(FlaskForm):
+    nom=StringField("Nom",validators=[DataRequired()])
+    prenom=StringField("Prenom",validators=[DataRequired()])
+    email=StringField("Email",validators=[DataRequired(),Email()])
+    age=IntegerField("age",validators=[DataRequired(),NumberRange(min=1,max=200,message="l'age doit etre positif")])
+    pays=StringField("Pays",validators=[DataRequired()])
+    ville=StringField("Ville",validators=[DataRequired()])
+    submit=SubmitField("S'inscrire")
+
+class Code(FlaskForm):
+    code=IntegerField("code",validators=[DataRequired(),NumberRange(min=10000,max=99999,message="code invalide")]) 
+    submit=SubmitField("Envoyer")   
+
+class userform(FlaskForm) :
+    username=StringField("Nom d'utilisateur",validators=[DataRequired()])
+    password = PasswordField("Mot de passe", validators=[
+        DataRequired(), Length(min=6, message="Le mot de passe doit contenir au moins 6 caractères.")
+    ])
+    confirm_password = PasswordField("Confirmer le mot de passe", validators=[
+        DataRequired(), EqualTo("password", message="Les mots de passe ne correspondent pas.")
+    ])
+    submit=SubmitField("Envoyer")
+
+
+
+
+@app.route("/",methods=['POST','GET'])
 def traiter_register():
-    result=request.form
-    utilisateur=Utilisateur(
-        email=result.get('email'),
-        username=result.get('username')
+    form=RegisterForm()
+    if form.validate_on_submit():
+      utilisateur=Utilisateur(
+             email=form.email.data,
+             nom=form.nom.data,
+             prenom=form.prenom.data,
+             pays=form.pays.data,
+             age=form.age.data,
+             ville=form.ville.data
     )
-    session.add(utilisateur)
-    session.commit()
-    return render_template('index.html')
+      db_session.add(utilisateur)
+      db_session.commit()
+      return redirect(url_for('send_email',email=utilisateur.email))
+    return render_template('register.html',form=form)
 
 
-app.run()
+emailsend=True
+
+@app.route("/send_email",methods=['POST','GET'])
+def send_email():
+   
+    validcode=Code()  
+
+
+    if request.method=='GET':
+         email = request.args.get('email') 
+         global emailsend
+         emailsend=False 
+         code=randint(10000,99999)
+         session['code'] = str(code)
+         session['email'] = email
+
+         msg=Message(
+        subject="Confirmation de l'email",
+        recipients=[email],
+        sender='sodjine558@gmail.com',
+        body=f"Nous vous avoyons ce code afin de vérifier votre adresse email.Veuiller copier le code de confirmation ci-dessous.\nVotre code de confirmation est {code}"
+    )   
+         if emailsend==False:
+            mail.send(msg)
+            emailsend=True
+         return render_template('index.html', validcode=validcode)
+
+    elif request.method=='POST' and  validcode.validate_on_submit():
+        code_saisi=str(validcode.code.data)
+        code_attendu=session.get('code')
+        if code_attendu==code_saisi:
+           return redirect (url_for('register_suite'))
+        
+        else:
+              return render_template('register_suite.html', validcode=validcode, erreur="Code incorrect")
+        
+
+   
+    
+    
+    return render_template('index.html',validcode=validcode)
+
+ 
+
+@app.route("/register_suite",methods=['POST','GET'])
+def register_suite():
+    form=userform()
+    if form.validate_on_submit():
+        usr=User(
+            username=form.username.data
+        )
+        usr.set_password(form.password.data)
+        db_session.add(usr)
+        db_session.commit()
+        return redirect(url_for('login'))
+    return render_template("register_suite.html",form=form)
+
+
+    return render_template("register_suite.html")        
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+
+if __name__=='__main__':
+    app.run(debug=True)
+
