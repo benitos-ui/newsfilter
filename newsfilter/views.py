@@ -63,6 +63,11 @@ class userform(FlaskForm) :
     ])
     submit=SubmitField("Envoyer")
 
+class loginform(FlaskForm):
+    username=StringField("Username",validators=[DataRequired()])
+    password = PasswordField("Mot de passe", validators=[DataRequired()])
+    submit = SubmitField("Se connecter")    
+
 
 
 
@@ -144,9 +149,23 @@ def register_suite():
 
     return render_template("register_suite.html")        
 
-@app.route("/login")
+@app.route("/login",methods=['POST','GET'])
 def login():
-    return render_template("login.html")
+    form=loginform()
+    erreur = None
+
+    if form.validate_on_submit():
+        
+        utilisateur = session.query(Utilisateur).filter_by(email=form.email.data).first()
+
+        
+        if utilisateur and utilisateur.check_password(form.password.data):
+            
+            return redirect(url_for("dashboard"))  
+        else:
+            erreur = "Email ou mot de passe incorrect."
+
+    return render_template("login.html", form=form, erreur=erreur)
 
 
 if __name__=='__main__':
