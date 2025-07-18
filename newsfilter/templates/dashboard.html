@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css')}}">
+    <title>Document</title>
+    <style>
+        body{
+            background: #121212;
+            justify-content: center;
+            color: #f1f1f1;
+        }
+    </style>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js')}}"></script>
+</head>
+<body>
+    <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+        <div class="container-md text-center p-5 rounded shadow bg-dark" style="max-width: 600px;">
+            <h1 class="mb-4">Dashboard</h1>
+            <p>Welcome to the dashboard! Here you can manage your news articles and settings.</p>
+           
+        </div>
+    </div>
+</body>
+</html>

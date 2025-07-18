@@ -6,7 +6,8 @@ from random import *
 from flask_wtf import FlaskForm
 from wtforms import StringField,SubmitField,PasswordField,IntegerField
 from wtforms.validators import DataRequired,Length,Email,NumberRange,EqualTo
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash,check_password_hash
+from sqlalchemy.exc import IntegrityError
 import os
 from sqlalchemy.orm import relationship
 from dotenv import load_dotenv
@@ -71,7 +72,7 @@ class loginform(FlaskForm):
 
 
 
-@app.route("/",methods=['POST','GET'])
+@app.route("/traiter_register",methods=['POST','GET'])
 def traiter_register():
     form=RegisterForm()
     if form.validate_on_submit():
@@ -149,23 +150,28 @@ def register_suite():
 
     return render_template("register_suite.html")        
 
-@app.route("/login",methods=['POST','GET'])
+@app.route("/",methods=['POST','GET'])
 def login():
     form=loginform()
     erreur = None
 
     if form.validate_on_submit():
         
-        utilisateur = session.query(Utilisateur).filter_by(email=form.email.data).first()
+        
+        user=db_session.query(User).filter_by(username=form.username.data).first()
 
         
-        if utilisateur and utilisateur.check_password(form.password.data):
+        if user and check_password_hash(user.password_hash, form.password.data):
             
             return redirect(url_for("dashboard"))  
         else:
-            erreur = "Email ou mot de passe incorrect."
+            erreur = "Username ou mot de passe incorrect."
 
-    return render_template("login.html", form=form, erreur=erreur)
+    return render_template("login.html", form=form, errors=erreur)
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 
 if __name__=='__main__':
