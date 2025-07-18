@@ -1,6 +1,7 @@
-from sqlalchemy import Column,Integer,String,Float,ForeignKey
+from sqlalchemy import Column,Integer,String,Float,ForeignKey,PickleType
 from sqlalchemy.orm import relationship, declarative_base
 from werkzeug.security import generate_password_hash
+from flask import session
 
 Base=declarative_base()
 
@@ -28,3 +29,12 @@ class  User(Base):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+
+
+class UserPreferences(Base):
+    __tablename__='user_preferences'
+    id=Column(Integer,primary_key=True,index=True)
+    theme=Column(PickleType)
+    user=relationship("User",backref='preferences') 
+    user_id=Column(Integer,ForeignKey('users.id'))
+          

@@ -1,15 +1,16 @@
 from flask import Flask,render_template,request,abort,redirect,url_for,session
-from models import Utilisateur,User
+from models import Utilisateur,User,UserPreferences
 from data import session as db_session
 from flask_mail import Message,Mail
 from random import *
 from flask_wtf import FlaskForm
-from wtforms import StringField,SubmitField,PasswordField,IntegerField
+from wtforms import StringField,SubmitField,PasswordField,IntegerField,SelectMultipleField,widgets
 from wtforms.validators import DataRequired,Length,Email,NumberRange,EqualTo
 from werkzeug.security import generate_password_hash,check_password_hash
 from sqlalchemy.exc import IntegrityError
 import os
 from sqlalchemy.orm import relationship
+from wtforms.widgets import ListWidget, CheckboxInput
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -69,6 +70,33 @@ class loginform(FlaskForm):
     password = PasswordField("Mot de passe", validators=[DataRequired()])
     submit = SubmitField("Se connecter")    
 
+
+
+THEMES=[     (1,'Politique'),
+             (2,'Sport'),
+             (3,'Culture'),
+             (4,'Santé'),
+             (5,'Technologie'),
+             (6,'International'),
+             (7,'Economie'),
+             (8,'Environnement'),
+             (9,'Education'),
+             (10,'Autre')
+        ]  
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = ListWidget(prefix_label=False)
+    option_widget = CheckboxInput()
+
+class Choiceform(FlaskForm):
+    theme=MultiCheckboxField("Choisir vos thèmes préférés",coerce=int)
+    submit=SubmitField("Enregistrer vos préférences")
+
+    
+   
+    
+    
+    
 
 
 
@@ -162,6 +190,10 @@ def login():
 
         
         if user and check_password_hash(user.password_hash, form.password.data):
+            session['user_id'] = user.id
+
+            if db_session.query(UserPreferences).filter_by(user_id=user.id).first() is None:
+                return redirect(url_for("choices"))
             
             return redirect(url_for("dashboard"))  
         else:
@@ -169,9 +201,36 @@ def login():
 
     return render_template("login.html", form=form, errors=erreur)
 
+@app.route("/choices",methods=['POST','GET'])
+def choices():
+   form=Choiceform()
+   form.theme.choices=THEMES
+   
+   if form.validate_on_submit():
+       selected_themes=form.theme.data
+       userpreference=UserPreferences(
+            theme=selected_themes,
+            user_id=session.get("user_id")
+       )
+       db_session.add(userpreference)
+       db_session.commit()
+       return redirect(url_for("dashboard"))
+   return render_template("choices.html",form=form)
+
+
 @app.route("/dashboard")
 def dashboard():
     return render_template("dashboard.html")
+
+
+@app.route('/logout')
+def logout():
+    session.pop('utilisateur_id', None)
+    return redirect(url_for('login'))
+
+
+
+
 
 
 if __name__=='__main__':

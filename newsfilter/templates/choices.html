@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choix des thèmes</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+  <style>
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    .form-dark {
+      background-color: #1e1e1e;
+      color: #f1f1f1;
+    }
+    .form-dark .form-control,
+    .form-dark .form-select {
+      background-color: #2c2c2c;
+      color: #f1f1f1;
+      border: 1px solid #444;
+    }
+    .form-dark .form-control:focus,
+    .form-dark .form-select:focus {
+      border-color: #66ffcc;
+      box-shadow: 0 0 0 0.2rem rgba(102, 255, 204, 0.25);
+    }
+    .btn-custom {
+      background-color: #66ffcc;
+      color: #000;
+      border: none;
+    }
+    .btn-custom:hover {
+      background-color: #4de0b3;
+    }
+    select[multiple] {
+    background-color: #2c2c2c;
+    color: #f1f1f1;
+    border: 1px solid #444;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 8px;
+}
+
+select[multiple] option {
+    list-style-type: none;
+    padding-left: 10px;
+}
+   
+  </style>
+</head>
+
+<body>
+  <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="container-md p-5 rounded shadow form-dark" style="max-width: 600px;">
+      <h1 class="mb-4 text-center">Choisissez vos thèmes préférés</h1>
+
+     <form method="post">
+  {{ form.hidden_tag() }}
+  
+  <div class="mb-3">
+    <label class="form-label">Choisissez vos thèmes :</label>
+    <div class="form-check text-start">
+      {% for subfield in form.themes %}
+        <div class="form-check">
+          {{ subfield(class="form-check-input", id=subfield.id) }}
+          <label class="form-check-label" for="{{ subfield.id }}">{{ subfield.label.text }}</label>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      {% for field, errors in form.errors.items() %}
+        {% for error in errors %}
+          <div>{{ error }}</div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="text-end">
+    {{ form.submit(class="btn btn-success") }}
+  </div>
+</form>
+        <div class="text-center mt-3">
+            <p>Vous pouvez modifier vos choix à tout moment dans les paramètres.</p>
+        </div>
+    </div>
+  </div>
+</body>
+</html>
