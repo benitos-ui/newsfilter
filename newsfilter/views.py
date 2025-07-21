@@ -1,5 +1,5 @@
 from flask import Flask,render_template,request,abort,redirect,url_for,session
-from models import Utilisateur,User,UserPreferences
+from .models import Utilisateur,User,UserPreferences
 from data import session as db_session
 from flask_mail import Message,Mail
 from random import *
@@ -12,6 +12,8 @@ import os
 from sqlalchemy.orm import relationship
 from wtforms.widgets import ListWidget, CheckboxInput
 from dotenv import load_dotenv
+import requests
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -220,7 +222,22 @@ def choices():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    user_id = session.get("user_id")
+    preferences = db_session.query(UserPreferences).filter_by(user_id=user_id).first()
+    articles_par_theme = {}
+
+    if preferences:
+        for theme_id in preferences.theme:
+            theme_name = dict(THEMES).get(theme_id)
+            if theme_name == "International":
+                articles = scrape_france24_articles("https://www.france24.com/fr/international/")
+            elif theme_name == "Politique":
+                articles = scrape_france24_articles("https://www.france24.com/fr/france/")
+            else:
+                articles = scrape_france24_articles()
+            articles_par_theme[theme_name] = articles
+
+    return render_template("dashboard.html", articles_par_theme=articles_par_theme)
 
 
 @app.route('/logout')
@@ -229,7 +246,22 @@ def logout():
     return redirect(url_for('login'))
 
 
+#Mise en place du Scraping
 
+def scrape_france24_articles(section_url="https://www.france24.com/fr/"):
+    response = requests.get(section_url)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    articles = []
+    for item in soup.select("a.article__title-link"):
+        titre = item.get_text(strip=True)
+        lien = item.get("href")
+        if titre and lien:
+            if not lien.startswith("http"):
+                lien = "https://www.france24.com" + lien
+            articles.append({"titre": titre, "lien": lien})
+
+    return articles
 
 
 
