@@ -11,6 +11,17 @@
             justify-content: center;
             color: #f1f1f1;
         }
+        .card-img-top{
+           max-height: 180px;
+           object-fit: cover;
+           border-bottom: 1px solid #333;
+        }
+
+        .card-title a:hover {
+           color: #00adb5;
+           text-decoration: underline;
+        }
+
     </style>
     <script src="{{ url_for('static',filename='js/bootstrap.min.js')}}"></script>
 </head>
@@ -19,7 +30,34 @@
         <div class="container-md text-center p-5 rounded shadow bg-dark" style="max-width: 600px;">
             <h1 class="mb-4">Dashboard</h1>
             <p>Welcome to the dashboard! Here you can manage your news articles and settings.</p>
-           
+
+            <div class="container">
+                {% for theme, articles in articles_par_theme.items() %}
+                    <div class="mb-5">
+                        <h2 class="text-info border-bottom pb-2">{{ theme }}</h2>
+                        <div class="row">
+                            {% for article in articles %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card bg-dark text-light h-100 shadow">
+                                        {% if article.image %}
+                                            <img src="{{ article.image }}" class="card-img-top" alt="Illustration">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <a href="{{ article.lien }}" class="text-info" target="_blank">{{ article.titre }}</a>
+                                            </h5>
+                                            <p class="card-text text-muted">{{ article.resume }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            
+
         </div>
     </div>
 </body>

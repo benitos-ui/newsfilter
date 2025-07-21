@@ -1,6 +1,6 @@
 from flask import Flask,render_template,request,abort,redirect,url_for,session
 from .models import Utilisateur,User,UserPreferences
-from data import session as db_session
+from .data import session as db_session
 from flask_mail import Message,Mail
 from random import *
 from flask_wtf import FlaskForm
@@ -9,9 +9,10 @@ from wtforms.validators import DataRequired,Length,Email,NumberRange,EqualTo
 from werkzeug.security import generate_password_hash,check_password_hash
 from sqlalchemy.exc import IntegrityError
 import os
+from dotenv import load_dotenv
 from sqlalchemy.orm import relationship
 from wtforms.widgets import ListWidget, CheckboxInput
-from dotenv import load_dotenv
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -256,10 +257,24 @@ def scrape_france24_articles(section_url="https://www.france24.com/fr/"):
     for item in soup.select("a.article__title-link"):
         titre = item.get_text(strip=True)
         lien = item.get("href")
+        resume=item.find_next("p")
+        texte_resume=resume.get_text(strip=True) if resume else "Pas de résumé disponible"
+        image_tag = (
+            item.find_previous("figure").find("img") if item.find_previous("figure") and item.find_previous("figure").find("img")
+            else soup.select_one(".article__media img") or item.find("img")
+        )
+        image_url=image_tag["src"] if image_tag and "src" in image_tag.attrs else None
+
+
         if titre and lien:
             if not lien.startswith("http"):
                 lien = "https://www.france24.com" + lien
-            articles.append({"titre": titre, "lien": lien})
+            articles.append({
+                "titre": titre, 
+                "lien": lien,
+                "resume":texte_resume,
+                "image":image_url
+                })
 
     return articles
 
